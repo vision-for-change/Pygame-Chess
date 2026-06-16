@@ -399,7 +399,6 @@ def format_time(seconds):
     return f"{minutes:02d}:{sec:02d}"
 
 
-# ---------- check / legal-move helpers ----------
 def is_square_attacked(target_row, target_col, by_player):
     for r in range(8):
         for c in range(8):
@@ -434,10 +433,12 @@ def _simulate_move(sr, sc, tr, tc):
     if piece in ["wK", "bK"] and abs(tc - sc) == 2:
         if tc > sc:
             saved['rook'] = (tr, 7, board[tr][7])
+            saved['rook_target'] = (tr, 5)
             board[tr][5] = board[tr][7]
             board[tr][7] = "--"
         else:
             saved['rook'] = (tr, 0, board[tr][0])
+            saved['rook_target'] = (tr, 3)
             board[tr][3] = board[tr][0]
             board[tr][0] = "--"
 
@@ -460,6 +461,10 @@ def _undo_simulation(saved):
     if 'rook' in saved:
         rr, rc, rpiece = saved['rook']
         board[rr][rc] = rpiece
+        # clear the rook's temporary castling destination if it was moved
+        if 'rook_target' in saved:
+            trr, trc = saved['rook_target']
+            board[trr][trc] = "--"
 
 
 def get_legal_moves(row, col):
@@ -477,7 +482,6 @@ def get_legal_moves(row, col):
             legal.append((tr, tc))
     return legal
 
-# ---------- end helpers ----------
 
 def has_any_legal_moves(player):
     for r in range(8):
