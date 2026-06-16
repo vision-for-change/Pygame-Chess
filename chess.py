@@ -63,6 +63,29 @@ def load_images():
 IMAGES = load_images()
 SMALL_IMAGES = {key: pygame.transform.scale(img, (32, 32)) for key, img in IMAGES.items()}
 
+# Background helper uses piece images from assets to decorate title and lose screens.
+def draw_screen_background():
+    screen.fill((238, 238, 210))
+    bg_pieces = ["wK", "bK", "wQ", "bQ", "wR", "bR", "wB", "bB"]
+    positions = [
+        (WIDTH * 0.08, HEIGHT * 0.08),
+        (WIDTH * 0.58, HEIGHT * 0.08),
+        (WIDTH * 0.18, HEIGHT * 0.30),
+        (WIDTH * 0.68, HEIGHT * 0.30),
+        (WIDTH * 0.05, HEIGHT * 0.62),
+        (WIDTH * 0.62, HEIGHT * 0.58),
+        (WIDTH * 0.30, HEIGHT * 0.72),
+        (WIDTH * 0.76, HEIGHT * 0.72)
+    ]
+    sizes = [140, 140, 120, 120, 100, 100, 90, 90]
+    for key, pos, size in zip(bg_pieces, positions, sizes):
+        img = pygame.transform.smoothscale(IMAGES[key], (size, size))
+        img.set_alpha(60)
+        screen.blit(img, pos)
+    overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    overlay.fill((238, 238, 210, 180))
+    screen.blit(overlay, (0, 0))
+
 # 8x8 chess board represented as a 2D list
 # Each element is a string:
 # "wP" = white pawn, "bR" = black rook, "--" = empty square
@@ -681,15 +704,16 @@ def display_menu():
                 if button_rect.collidepoint(event.pos):
                     return True
 
-        # background color
-        screen.fill((238, 238, 210))
+        # background image made from piece assets
+        draw_screen_background()
 
         # title text
-        screen.blit(title_text, (WIDTH // 2 - title_text.get_width() // 2, 100))
+        screen.blit(title_text, (WIDTH // 2 - title_text.get_width() // 2, HEIGHT * 0.18))
 
         # start button
         pygame.draw.rect(screen, (118, 150, 86), button_rect)
-        screen.blit(start_text, (button_rect.x + 15, button_rect.y + 10))
+        screen.blit(start_text, (button_rect.x + button_rect.width // 2 - start_text.get_width() // 2,
+                                 button_rect.y + button_rect.height // 2 - start_text.get_height() // 2))
 
         pygame.display.flip()
 
@@ -773,10 +797,10 @@ def lose_screen(player_names, winner_name=None):
             if event.type == pygame.QUIT:
                 return
 
-        screen.fill((238, 238, 210))
-        screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
+        draw_screen_background()
+        screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT * 0.40 - text.get_height() // 2))
         info = small.render("Close window to exit", True, (0, 0, 0))
-        screen.blit(info, (WIDTH // 2 - info.get_width() // 2, HEIGHT // 2 + 60))
+        screen.blit(info, (WIDTH // 2 - info.get_width() // 2, HEIGHT * 0.55 - info.get_height() // 2))
         pygame.display.flip()
 
 def pieces_taken(current_player, white_time, black_time):
